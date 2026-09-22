@@ -20,6 +20,9 @@ CONTRACTS_DIR = Path(__file__).parent.parent / "contracts"
 app = FastAPI(title="Gerador de Contratos - Juridico")
 views = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
+@app.get("/debug/headers")
+def debug_headers(request: Request):
+    return dict(request.headers)
 
 def load_schemas() -> dict:
     """Le todos os *.json de /contracts. Sem cache: Juridico sobe arquivo e ja aparece."""
