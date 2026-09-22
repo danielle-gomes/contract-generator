@@ -1,0 +1,12 @@
+version: v1
+
+components:
+- name: contract-generator
+  docker:
+    file: Dockerfile
+  ports:
+  - 8000
+  ingresses:
+  - host: contract-generator
+    path: /
+    port: 8000
