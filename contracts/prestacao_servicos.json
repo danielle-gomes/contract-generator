@@ -1,0 +1,62 @@
+{
+  "label": "Contrato de Prestação de Serviços",
+  "template": "Prestação de Serviços - Final.docx",
+  "fields": [
+    {
+      "tag": "UNIDADE",
+      "question": "Unidade Continental contratante",
+      "type": "choice",
+      "options": ["Camaçari", "Jundiai", "Ambas"],
+      "hint": "Define qual preâmbulo e qual bloco de condições de pagamento (Anexo A) serão usados no contrato."
+    },
+    {
+      "tag": "SERVICOS_INTEGRALMENTE_CONTRATADA",
+      "question": "Os serviços serão executados exclusivamente nas dependências da Contratada?",
+      "type": "boolean",
+      "hint": "Marcar somente com confirmação expressa de que nenhuma atividade ocorrerá nas instalações da Continental."
+    },
+    {
+      "tag": "SERVICOS_FORA_CONTINENTAL",
+      "question": "Haverá prestação de serviços dentro das dependências da Continental?",
+      "type": "boolean",
+      "hint": "Controla as cláusulas de segurança, crachá, equipamentos e acesso às instalações da Continental."
+    },
+    { "tag": "CONTRATADA_RAZAOSOCIAL", "question": "Razão social completa da Contratada", "type": "text",
+      "hint": "Nome oficial exatamente como consta no CNPJ. Ex.: Comércio de Pneus Brasil Ltda." },
+    { "tag": "CONTRATADA_CIDADE", "question": "Cidade da sede/filial da Contratada", "type": "text" },
+    { "tag": "CONTRATADA_ESTADO", "question": "Estado da Contratada (sigla)", "type": "text", "hint": "Ex.: SP" },
+    { "tag": "CONTRATADA_RUA", "question": "Logradouro da Contratada", "type": "text" },
+    { "tag": "CONTRATADA_NUMERO", "question": "Número do endereço da Contratada", "type": "text" },
+    { "tag": "CONTRATADA_BAIRRO", "question": "Bairro da Contratada", "type": "text" },
+    { "tag": "CONTRATADA_CEP", "question": "CEP da Contratada", "type": "text", "hint": "Formato 00000-000" },
+    { "tag": "CONTRATADA_CNPJ", "question": "CNPJ da Contratada", "type": "text",
+      "hint": "Conferir no cartão CNPJ atualizado. Formato 00.000.000/0001-00" },
+    { "tag": "CONTRATADA_REPRESENTANTE", "question": "Nome completo do representante legal da Contratada", "type": "text",
+      "hint": "Deve constar em procuração/contrato social (capítulo 'administração')." },
+    { "tag": "CONTRATADA_DESCRICAOSERVICOS", "question": "Descrição detalhada dos serviços (Anexo B)", "type": "longtext",
+      "hint": "Descrever: quais serviços, atividades específicas, o que está fora do escopo, métodos/procedimentos, métricas e critérios de aprovação." },
+    { "tag": "VALORTOTAL", "question": "Valor total do contrato", "type": "text",
+      "hint": "Incluir valor numérico e por extenso. Ex.: R$ 120.000,00 (cento e vinte mil reais)" },
+    { "tag": "FORMAPAGAMENTOS", "question": "Condições específicas de pagamento", "type": "longtext",
+      "hint": "Ex.: Em 12 (doze) parcelas mensais, iguais e sucessivas, mediante emissão da respectiva nota fiscal." },
+    { "tag": "PERIODOSERVICO", "question": "Período de execução dos serviços", "type": "text",
+      "hint": "Ex.: 1º de janeiro de 2027 a 31 de dezembro de 2027" },
+    { "tag": "VIGENCIA", "question": "Data final de vigência do contrato", "type": "text",
+      "hint": "Data por extenso. Ex.: 31 de dezembro de 2027" },
+    { "tag": "INDICE_REAJUSTE", "question": "Índice de reajuste do preço", "type": "choice",
+      "options": [
+        "IPCA, divulgado pelo IBGE",
+        "IGP-M, conforme índice publicado pela Fundação Getúlio Vargas",
+        "INPC, divulgado pelo IBGE"
+      ],
+      "hint": "Se usar mais de um índice combinado (principal + substituto), ajustar o texto manualmente na minuta final." },
+    { "tag": "PRAZO_RESILICAO", "question": "Prazo de aviso prévio para resilição imotivada", "type": "text",
+      "hint": "Padrão: 30 (trinta) dias. Ajustar para 45, 60, 90 ou 180 dias se a complexidade do serviço exigir mais tempo de desmobilização." },
+    { "tag": "FORO_CIDADE", "question": "Cidade do foro de eleição", "type": "text",
+      "hint": "Lei 14.879/2024 exige conexão territorial (domicílio da Contratante, da Contratada ou local da obrigação). Preferir capital estadual." },
+    { "tag": "FORO_ESTADO", "question": "Estado do foro de eleição", "type": "text" },
+    { "tag": "LOCAL_ASSINATURA", "question": "Local de assinatura", "type": "text", "hint": "Ex.: Jundiaí/SP" },
+    { "tag": "DATA_EXTENSO", "question": "Data de assinatura por extenso", "type": "text",
+      "hint": "Ex.: 17 de setembro de 2026" }
+  ]
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ schema.label }}</title>
+  <style>
+    :root { --conti-yellow:#FFA500; }
+    * { box-sizing:border-box; }
+    body { font-family:system-ui,Segoe UI,sans-serif; background:#f4f5f7; color:#1a1a1a;
+           margin:0; display:flex; justify-content:center; padding:48px 16px; }
+    .card { background:#fff; border-radius:12px; padding:32px; max-width:640px; width:100%;
+            box-shadow:0 2px 16px rgba(0,0,0,.08); }
+    h1 { margin:0 0 24px; font-size:1.4rem; }
+    label { display:block; font-weight:600; font-size:.85rem; margin-bottom:6px; }
+    .hint { font-weight:400; color:#777; font-size:.78rem; display:block; margin-bottom:6px; }
+    input[type=text],input[type=number],input[type=date],select,textarea {
+      width:100%; padding:10px 12px; border:1px solid #d5d5d5; border-radius:6px;
+      font-size:.95rem; font-family:inherit; margin-bottom:18px; }
+    textarea { min-height:90px; resize:vertical; }
+    .check { display:flex; gap:10px; align-items:flex-start; margin-bottom:18px; }
+    .check input { margin-top:3px; }
+    .check label { font-weight:400; }
+    button { background:var(--conti-yellow); border:0; padding:13px 24px; border-radius:6px;
+             font-weight:700; font-size:.95rem; cursor:pointer; width:100%; }
+    a.back { display:inline-block; margin-bottom:16px; font-size:.85rem; color:#666; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <a class="back" href="/">&larr; Voltar</a>
+    <h1>{{ schema.label }}</h1>
+    <form method="post" action="/generate/{{ contract_id }}">
+      {% for f in schema.fields %}
+        {% if f.type == 'boolean' %}
+          <div class="check">
+            <input type="checkbox" id="{{ f.tag }}" name="{{ f.tag }}">
+            <label for="{{ f.tag }}">{{ f.question }}</label>
+          </div>
+        {% else %}
+          <label for="{{ f.tag }}">{{ f.question }}{% if f.required %} *{% endif %}</label>
+          {% if f.hint %}<span class="hint">{{ f.hint }}</span>{% endif %}
+          {% if f.type == 'choice' %}
+            <select id="{{ f.tag }}" name="{{ f.tag }}" {% if f.required %}required{% endif %}>
+              <option value="">Selecione...</option>
+              {% for o in f.options %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+            </select>
+          {% elif f.type == 'longtext' %}
+            <textarea id="{{ f.tag }}" name="{{ f.tag }}" {% if f.required %}required{% endif %}></textarea>
+          {% else %}
+            <input type="{{ 'number' if f.type=='number' else ('date' if f.type=='date' else 'text') }}"
+                   {% if f.type=='number' %}step="any"{% endif %}
+                   id="{{ f.tag }}" name="{{ f.tag }}"
+                   {% if f.required %}required{% endif %}>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <button type="submit">Gerar contrato</button>
+    </form>
+  </div>
+</body>
+</html>
