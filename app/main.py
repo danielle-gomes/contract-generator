@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 from fastapi import Depends
-from app.auth import current_user
+from app.auth import get_user
 
 BASE_DIR = Path(__file__).parent
 CONTRACTS_DIR = Path(__file__).parent.parent / "contracts"
