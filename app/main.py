@@ -24,7 +24,7 @@ app = FastAPI(title="Gerador de Contratos - Juridico")
 views = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @app.get("/whoami")
-def whoami(user: dict = Depends(current_user)):
+def whoami(user: dict = Depends(get_user)):
     return user
 
 def load_schemas() -> dict:
