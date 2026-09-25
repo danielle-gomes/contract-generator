@@ -1,38 +1,18 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gerador de Contratos</title>
-  <style>
-    :root { --conti-yellow:#FFA500; --ink:#1a1a1a; }
-    * { box-sizing:border-box; }
-    body { font-family:system-ui,Segoe UI,sans-serif; background:#f4f5f7; color:var(--ink);
-           margin:0; display:flex; justify-content:center; padding:48px 16px; }
-    .card { background:#fff; border-radius:12px; padding:32px; max-width:560px; width:100%;
-            box-shadow:0 2px 16px rgba(0,0,0,.08); }
-    h1 { margin:0 0 4px; font-size:1.5rem; }
-    p.sub { margin:0 0 24px; color:#666; font-size:.9rem; }
-    a.item { display:block; padding:16px; border:1px solid #e3e3e3; border-radius:8px;
-             margin-bottom:10px; text-decoration:none; color:inherit; transition:.15s; }
-    a.item:hover { border-color:var(--conti-yellow); background:#fffdf5; }
-    .err { padding:16px; border-radius:8px; background:#fdeaea; color:#a11; margin-bottom:10px;
-           font-size:.85rem; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Gerador de Contratos</h1>
-    <p class="sub">Selecione o tipo de contrato para preencher as informacoes.</p>
-    {% for opt in options %}
-      {% if opt.error %}
-        <div class="err"><strong>{{ opt.id }}</strong> - {{ opt.error }}</div>
-      {% else %}
-        <a class="item" href="/form/{{ opt.id }}">{{ opt.label }}</a>
-      {% endif %}
+{% extends "base.html" %}
+
+{% block title %}Gerador de Contratos{% endblock %}
+
+{% block content %}
+  <h1>Gerador de Contratos</h1>
+  <p class="sub">Selecione o tipo de contrato para preencher as informações.</p>
+
+  {% for opt in options %}
+    {% if opt.error %}
+      <div class="err"><strong>{{ opt.id }}</strong> — {{ opt.error }}</div>
     {% else %}
-      <div class="err">Nenhum contrato cadastrado. Adicione um .json e um .docx na pasta /contracts.</div>
-    {% endfor %}
-  </div>
-</body>
-</html>
+      <a class="item" href="/form/{{ opt.id }}">{{ opt.label }}</a>
+    {% endif %}
+  {% else %}
+    <div class="err">Nenhum contrato cadastrado. Adicione um .json e um .docx na pasta /contracts.</div>
+  {% endfor %}
+{% endblock %}

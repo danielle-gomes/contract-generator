@@ -39,6 +39,15 @@ def claims(request: Request):
         return {"erro": "sem header"}
     return jwt.decode(token, options={"verify_signature": False})
 
+
+def get_uid(request: Request) -> str:
+    token = request.headers.get("X-Oidc-Id-Token")
+    if not token:
+        raise HTTPException(401, "SSO header ausente")
+    c = jwt.decode(token, options={"verify_signature": False})
+    return c.get("email", "").split("@")[0].upper()
+
+
 def load_schemas() -> dict:
     """Le todos os *.json de /contracts. Sem cache: Juridico sobe arquivo e ja aparece."""
     schemas = {}
