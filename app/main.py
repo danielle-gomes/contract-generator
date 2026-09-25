@@ -15,10 +15,15 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 from fastapi import Depends
-from app.auth import get_user
 
 import jwt
 from fastapi import Request
+
+from fastapi.staticfiles import StaticFiles
+from auth import get_user_name
+
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+
 
 
 
@@ -28,9 +33,6 @@ CONTRACTS_DIR = Path(__file__).parent.parent / "contracts"
 app = FastAPI(title="Gerador de Contratos - Juridico")
 views = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-@app.get("/whoami")
-def whoami(user: dict = Depends(get_user)):
-    return user
 
 @app.get("/claims")
 def claims(request: Request):
@@ -73,18 +75,34 @@ def slugify(value: str) -> str:
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     schemas = load_schemas()
+
     options = [
         {"id": key, "label": val.get("label", key), "error": val.get("_error")}
         for key, val in schemas.items()
     ]
-    return views.TemplateResponse("index.html", {"request": request, "options": options})
+
+    return views.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "options": options,
+            "user_name": get_user_name(request)   # <- adicionar
+        }
+    )
 
 
 @app.get("/form/{contract_id}", response_class=HTMLResponse)
 def form(request: Request, contract_id: str):
     schema = get_schema(contract_id)
+
     return views.TemplateResponse(
-        "form.html", {"request": request, "contract_id": contract_id, "schema": schema}
+        "form.html",
+        {
+            "request": request,
+            "contract_id": contract_id,
+            "schema": schema,
+            "user_name": get_user_name(request)   # <- adicionar
+        }
     )
 
 
