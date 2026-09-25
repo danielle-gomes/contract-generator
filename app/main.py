@@ -17,6 +17,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Depends
 from app.auth import get_user
 
+import jwt
+from fastapi import Request
+
+
+
 BASE_DIR = Path(__file__).parent
 CONTRACTS_DIR = Path(__file__).parent.parent / "contracts"
 
@@ -26,6 +31,13 @@ views = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 @app.get("/whoami")
 def whoami(user: dict = Depends(get_user)):
     return user
+
+@app.get("/claims")
+def claims(request: Request):
+    token = request.headers.get("X-Oidc-Id-Token")
+    if not token:
+        return {"erro": "sem header"}
+    return jwt.decode(token, options={"verify_signature": False})
 
 def load_schemas() -> dict:
     """Le todos os *.json de /contracts. Sem cache: Juridico sobe arquivo e ja aparece."""
