@@ -155,3 +155,18 @@ async def generate(contract_id: str, request: Request):
 def health():
     """Readiness/liveness probe do Pergola."""
     return {"status": "ok", "contratos": len(load_schemas())}
+
+import socket
+
+@app.get("/nettest")
+def nettest():
+    """TEMPORARIO: testa se o container alcança cada destino. Remover depois."""
+    alvos = [("SMTPHubEU.contiwan.com", 587), ("JUVM005A", 1433), ("api.github.com", 443)]
+    resultado = {}
+    for host, port in alvos:
+        try:
+            socket.create_connection((host, port), timeout=5).close()
+            resultado[f"{host}:{port}"] = "OK"
+        except Exception as e:
+            resultado[f"{host}:{port}"] = f"FALHOU - {type(e).__name__}: {e}"
+    return resultado
