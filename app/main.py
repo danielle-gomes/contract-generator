@@ -15,6 +15,9 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from decimal import Decimal, InvalidOperation 
+from num2words import num2words
+
 
 from auth import get_user_name
 
@@ -51,6 +54,18 @@ def get_schema(contract_id: str) -> dict:
 def slugify(value: str) -> str:
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     return re.sub(r"[^A-Za-z0-9_-]+", "_", value).strip("_") or "contrato"
+
+
+def format_brl(raw: str) -> str:
+    """'R$ 1.234,56' -> 'R$ 1.234,56 (mil, duzentos e trinta e quatro reais e cinquenta e seis centavos)'."""
+    clean = re.sub(r"[^\d,]", "", raw).replace(",", ".")
+    try:
+        value = Decimal(clean)
+    except InvalidOperation:
+        raise HTTPException(422, f"Valor inválido: {raw}")
+    numero = f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    extenso = num2words(value, lang="pt_BR", to="currency")
+    return f"R$ {numero} ({extenso})"
 
 
 def strip_comments(docx) -> None:
@@ -109,6 +124,8 @@ async def generate(contract_id: str, request: Request):
             context[tag] = float(raw)  # input type=number ja envia com ponto decimal
         elif ftype == "date":
             context[tag] = datetime.fromisoformat(raw).strftime("%d/%m/%Y")
+        elif ftype == "money":
+            context[tag] = format_brl(raw)
         else:
             context[tag] = raw.replace("\r\n", "\n")
 

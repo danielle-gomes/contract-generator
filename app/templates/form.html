@@ -25,11 +25,17 @@
           </select>
         {% elif f.type == 'longtext' %}
           <textarea id="{{ f.tag }}" name="{{ f.tag }}" {% if f.required %}required{% endif %}></textarea>
+        {% elif f.type == "money" %}
+          <input type="text" inputmode="numeric" class="money"
+                name="{{ f.tag }}" placeholder="R$ 0,00"
+                {% if f.required %}required{% endif %}>
         {% else %}
           <input type="{{ 'number' if f.type=='number' else ('date' if f.type=='date' else 'text') }}"
-                 {% if f.type=='number' %}step="any"{% endif %}
-                 id="{{ f.tag }}" name="{{ f.tag }}"
-                 {% if f.required %}required{% endif %}>
+                {% if f.type=='number' %}step="any"{% endif %}
+                {% if f.mask %}data-mask="{{ f.mask }}" inputmode="numeric" placeholder="{{ f.mask }}"
+                  minlength="{{ f.mask|length }}" maxlength="{{ f.mask|length }}"{% endif %}
+                id="{{ f.tag }}" name="{{ f.tag }}"
+                {% if f.required %}required{% endif %}>
         {% endif %}
       {% endif %}
     {% endfor %}
