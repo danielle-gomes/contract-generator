@@ -1,61 +1,41 @@
 """
 Gerador de Contratos - Juridico
-Engine generica: le schemas JSON + templates .docx e renderiza tudo dinamicamente.
-Adicionar um contrato novo = adicionar 1 .json + 1 .docx em /contracts. Zero codigo.
+Adicionar contrato = 1 .json + 1 .docx em /contracts. Zero codigo.
 """
 import io
 import json
 import re
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 
+from docx.oxml.ns import qn
 from docxtpl import DocxTemplate
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from fastapi import Depends
-
-import jwt
-from fastapi import Request
-
-from fastapi.staticfiles import StaticFiles
 from auth import get_user_name
 
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
-
-
-
-
 BASE_DIR = Path(__file__).parent
-CONTRACTS_DIR = Path(__file__).parent.parent / "contracts"
+CONTRACTS_DIR = BASE_DIR.parent / "contracts"
 
 app = FastAPI(title="Gerador de Contratos - Juridico")
-views = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
-
-@app.get("/claims")
-def claims(request: Request):
-    token = request.headers.get("X-Oidc-Id-Token")
-    if not token:
-        return {"erro": "sem header"}
-    return jwt.decode(token, options={"verify_signature": False})
-
-
-def get_uid(request: Request) -> str:
-    token = request.headers.get("X-Oidc-Id-Token")
-    if not token:
-        raise HTTPException(401, "SSO header ausente")
-    c = jwt.decode(token, options={"verify_signature": False})
-    return c.get("email", "").split("@")[0].upper()
+app.mount("/assets", StaticFiles(directory=BASE_DIR / "assets"), name="assets")
+views = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 def load_schemas() -> dict:
-    """Le todos os *.json de /contracts. Sem cache: Juridico sobe arquivo e ja aparece."""
+    """Le todos os *.json de /contracts (sem cache) e aplica defaults nos campos."""
     schemas = {}
     for path in sorted(CONTRACTS_DIR.glob("*.json")):
         try:
-            schemas[path.stem] = json.loads(path.read_text(encoding="utf-8"))
+            schema = json.loads(path.read_text(encoding="utf-8"))
+            for f in schema.get("fields", []):
+                f.setdefault("type", "text")
+                f.setdefault("required", f["type"] != "boolean")
+            schemas[path.stem] = schema
         except json.JSONDecodeError as exc:
             schemas[path.stem] = {"_error": f"JSON invalido: {exc}"}
     return schemas
@@ -69,40 +49,42 @@ def get_schema(contract_id: str) -> dict:
 
 
 def slugify(value: str) -> str:
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     return re.sub(r"[^A-Za-z0-9_-]+", "_", value).strip("_") or "contrato"
+
+
+def strip_comments(docx) -> None:
+    """Remove os comentarios internos do Juridico do arquivo final (template continua anotado)."""
+    for tag in ("w:commentRangeStart", "w:commentRangeEnd", "w:commentReference"):
+        for el in list(docx.element.body.iter(qn(tag))):
+            el.getparent().remove(el)
+    for rid, rel in list(docx.part.rels.items()):
+        if "comments" in rel.reltype:
+            docx.part.drop_rel(rid)
 
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    schemas = load_schemas()
-
     options = [
-        {"id": key, "label": val.get("label", key), "error": val.get("_error")}
-        for key, val in schemas.items()
+        {"id": k, "label": v.get("label", k), "error": v.get("_error")}
+        for k, v in load_schemas().items()
     ]
-
     return views.TemplateResponse(
         "index.html",
-        {
-            "request": request,
-            "options": options,
-            "user_name": get_user_name(request)   # <- adicionar
-        }
+        {"request": request, "options": options, "user_name": get_user_name(request)},
     )
 
 
 @app.get("/form/{contract_id}", response_class=HTMLResponse)
 def form(request: Request, contract_id: str):
-    schema = get_schema(contract_id)
-
     return views.TemplateResponse(
         "form.html",
         {
             "request": request,
             "contract_id": contract_id,
-            "schema": schema,
-            "user_name": get_user_name(request)   # <- adicionar
-        }
+            "schema": get_schema(contract_id),
+            "user_name": get_user_name(request),
+        },
     )
 
 
@@ -110,28 +92,26 @@ def form(request: Request, contract_id: str):
 async def generate(contract_id: str, request: Request):
     schema = get_schema(contract_id)
     form_data = await request.form()
-
     context, missing = {}, []
+
     for field in schema["fields"]:
-        tag, ftype = field["tag"], field.get("type", "text")
-        raw = form_data.get(tag)
-
+        tag, ftype = field["tag"], field["type"]
         if ftype == "boolean":
-            context[tag] = raw is not None          # checkbox marcado ou nao
+            context[tag] = tag in form_data
             continue
 
-        if not raw and field.get("required", True):
-            missing.append(field.get("question", tag))
-            continue
-
-        if ftype == "number":
-            context[tag] = float(str(raw).replace(".", "").replace(",", ".")) if raw else None
-        elif ftype == "date" and raw:
+        raw = (form_data.get(tag) or "").strip()
+        if not raw:
+            if field["required"]:
+                missing.append(field.get("question", tag))
+            context[tag] = ""
+        elif ftype == "number":
+            context[tag] = float(raw)  # input type=number ja envia com ponto decimal
+        elif ftype == "date":
             context[tag] = datetime.fromisoformat(raw).strftime("%d/%m/%Y")
         else:
-            context[tag] = raw or ""
+            context[tag] = raw.replace("\r\n", "\n")
 
-    # Business exception explicita: nada de contrato saindo com buraco silencioso
     if missing:
         raise HTTPException(422, {"erro": "Campos obrigatorios nao preenchidos", "campos": missing})
 
@@ -140,12 +120,12 @@ async def generate(contract_id: str, request: Request):
         raise HTTPException(500, f"Template '{schema['template']}' nao encontrado no servidor.")
 
     doc = DocxTemplate(str(template_path))
-    doc.render(context)
+    doc.render(context, autoescape=True)  # '&' e '<' nao corrompem mais o docx
+    strip_comments(doc.docx)
 
     buffer = io.BytesIO()
     doc.save(buffer)
     buffer.seek(0)
-
     filename = f"{slugify(schema.get('label', contract_id))}_{datetime.now():%Y%m%d_%H%M%S}.docx"
     return StreamingResponse(
         buffer,
@@ -156,5 +136,5 @@ async def generate(contract_id: str, request: Request):
 
 @app.get("/health")
 def health():
-    """Usado pelo readiness/liveness probe do Pergola."""
+    """Readiness/liveness probe do Pergola."""
     return {"status": "ok", "contratos": len(load_schemas())}

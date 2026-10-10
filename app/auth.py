@@ -15,11 +15,6 @@ def get_claims(request: Request) -> dict:
         return {}
 
 
-def get_uid(request: Request) -> str:
-    """UIE do usuario, derivado do claim email (ex.: uie20919@contiwan.com -> UIE20919)."""
-    return get_claims(request).get("email", "").split("@")[0].upper()
-
-
 def get_user_name(request: Request) -> str:
     """Nome no formato de leitura: 'Gomes, Danielle' -> 'Danielle Gomes'."""
     name = get_claims(request).get("name", "")

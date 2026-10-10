@@ -25,7 +25,7 @@
       "hint": "Nome oficial exatamente como consta no CNPJ. Ex.: Comércio de Pneus Brasil Ltda." },
     { "tag": "CONTRATADA_CIDADE", "question": "Cidade da sede/filial da Contratada", "type": "text" },
     { "tag": "CONTRATADA_ESTADO", "question": "Estado da Contratada (sigla)", "type": "text", "hint": "Ex.: SP" },
-    { "tag": "CONTRATADA_RUA", "question": "Logradouro da Contratada", "type": "text" },
+    { "tag": "CONTRATADA_LOGRADOURO", "question": "Logradouro da Contratada", "type": "text" },
     { "tag": "CONTRATADA_NUMERO", "question": "Número do endereço da Contratada", "type": "text" },
     { "tag": "CONTRATADA_BAIRRO", "question": "Bairro da Contratada", "type": "text" },
     { "tag": "CONTRATADA_CEP", "question": "CEP da Contratada", "type": "text", "hint": "Formato 00000-000" },
