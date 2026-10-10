@@ -161,7 +161,7 @@ import socket
 @app.get("/nettest")
 def nettest():
     """TEMPORARIO: testa se o container alcança cada destino. Remover depois."""
-    alvos = [("SMTPHubEU.contiwan.com", 587), ("JUVM005A.tiretech2.contiwan.com", 1433), ("api.github.com", 443)]
+    alvos = [("SMTPHubEU.contiwan.com", 587), ("JUVM005A.tiretech2.contiwan.com", 1433), ("api.github.com", 443), ("jufs002.tiretech2.contiwan.com", 445)]
     resultado = {}
     for host, port in alvos:
         try:
